@@ -15,5 +15,5 @@ with open('university.json', 'r', encoding='utf-8') as file:
         output_text = f"{name} {university}\n"
         
         # 打开输出文件，并追加内容
-        with open('university.txt', 'a', encoding='utf-8') as output_file:
+        with open('湛江一中2022届毕业去向.txt', 'a', encoding='utf-8') as output_file:
             output_file.write(output_text)
