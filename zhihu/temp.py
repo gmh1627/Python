@@ -3,11 +3,13 @@ import os
 import re
 from jinja2 import Environment, FileSystemLoader
 import requests
+import pdfkit
 
-# API URL
-url = 'https://www.zhihu.com/api/v4/columns/c_1747690982282477569/articles'
+# 用户输入专栏名称，默认为c_1747690982282477569
+column_id = input("请输入知乎专栏ID（默认为 c_1747690982282477569）：") or 'c_1747690982282477569'
+url = f'https://www.zhihu.com/api/v4/columns/{column_id}/articles'
 
-# 发送请求
+# 发送请求获取专栏文章列表
 response = requests.get(url)
 
 # 检查请求是否成功
@@ -25,6 +27,9 @@ else:
     print(f"请求失败，状态码：{response.status_code}")
 
 def process_content(content):
+    """
+    处理HTML内容，移除不需要的标签和属性，调整样式等。
+    """
     # 移除标识符号
     # 匹配 data-pid 属性，并允许属性值使用普通双引号或转义的双引号，以及可能存在的空白字符
     content = re.sub(r'data-pid\s*=\s*(?:"|\")(.+?)(?:"|\")', '', content)
@@ -32,7 +37,7 @@ def process_content(content):
     # 替换特殊字符
     content = content.replace('\u003C', '<').replace('\u003E', '>')
     
-    # 处理<p>标签
+    # 处理<p>标签，添加缩进和底部边距
     content = content.replace('<p ', '<p style="text-indent: 2em; margin-bottom: 1em;">')
     
     # 处理</p>标签
@@ -108,8 +113,6 @@ for article in articles_data:
 
 print("所有文章已保存为HTML文件")
 
-import pdfkit
-
 # 指定输入文件夹
 input_dir = 'articles'
 
@@ -138,7 +141,7 @@ for filename in os.listdir(input_dir):
                 'disable-local-file-access': None,
                 'load-error-handling': 'ignore',
             }
-            
+            # 注意html文件名不能含有中文
             pdfkit.from_string(html_content, pdf_file_path, options=options)
             print(f"{filename} 已转换为 {pdf_filename}")
         except Exception as e:
